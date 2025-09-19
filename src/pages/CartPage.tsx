@@ -46,7 +46,7 @@ const CartPage = () => {
               Looks like you haven't added any eco-friendly products yet.
             </p>
             <Link to="/shop">
-              <Button size="lg" variant="eco">
+              <Button size="lg" variant="default">
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Continue Shopping
               </Button>
@@ -228,7 +228,7 @@ const CartPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Button className="w-full" size="lg" variant="eco">
+                  <Button className="w-full" size="lg" variant="default">
                     Proceed to Checkout
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">

@@ -241,3 +241,16 @@ export const getFeaturedProducts = (): Product[] => {
 export const getProductsByCategory = (category: string): Product[] => {
   return products.filter(product => product.category === category);
 };
+
+export const getProductsByBrand = (brandName: string) => {
+  const brandMap: { [key: string]: string } = {
+    'happy-raithu': 'Happy Raithu',
+    'gracious-gas': 'Gracious Gas',
+    'sbl-pots': 'SBL Pots',
+    'clayer': 'Clayer',
+    'neem-brush': 'Neem Brush'
+  };
+  
+  const brand = brandMap[brandName];
+  return brand ? products.filter(product => product.brand === brand) : [];
+};

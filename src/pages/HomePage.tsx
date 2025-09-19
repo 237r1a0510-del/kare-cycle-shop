@@ -182,7 +182,7 @@ const HomePage = () => {
 
           <div className="text-center">
             <Link to="/shop">
-              <Button size="lg" variant="eco">
+              <Button size="lg" variant="default">
                 View All Products
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
