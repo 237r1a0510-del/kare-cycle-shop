@@ -228,9 +228,11 @@ const CartPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Button className="w-full" size="lg" variant="default">
-                    Proceed to Checkout
-                  </Button>
+                  <Link to="/checkout">
+                    <Button className="w-full" size="lg" variant="default">
+                      Proceed to Checkout
+                    </Button>
+                  </Link>
                   <p className="text-xs text-center text-muted-foreground">
                     Secure checkout powered by Stripe
                   </p>

@@ -6,17 +6,17 @@
 
 @layer base {
   :root {
-    /* Core Background & Text */
-    --background: 46 20% 98%;
-    --foreground: 150 8% 15%;
+    /* Core Background & Text - Black Theme */
+    --background: 0 0% 4%;
+    --foreground: 46 20% 95%;
 
     /* Card System */
-    --card: 0 0% 100%;
-    --card-foreground: 150 8% 15%;
+    --card: 0 0% 8%;
+    --card-foreground: 46 20% 95%;
 
     /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 150 8% 15%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 46 20% 95%;
 
     /* Primary Brand - Forest Green */
     --primary: 142 76% 36%;

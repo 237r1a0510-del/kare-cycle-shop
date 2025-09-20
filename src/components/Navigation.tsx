@@ -13,8 +13,9 @@ const Navigation = () => {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
-    { name: 'Brands', path: '/brands' },
     { name: 'About', path: '/about' },
+    { name: 'Volunteer', path: '/volunteer' },
+    { name: 'Donate', path: '/donate' },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -35,7 +36,7 @@ const Navigation = () => {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Kare 💖 Save
+                Kare <span className="text-pink-500">💖</span> Save
               </h1>
               <p className="text-xs text-muted-foreground -mt-1">The Caring Cycle</p>
             </div>
