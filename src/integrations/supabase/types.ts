@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      biogas_stations: {
+        Row: {
+          address: string
+          contact_person: string
+          created_at: string
+          id: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          contact_person: string
+          created_at?: string
+          id?: string
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          contact_person?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -322,6 +349,9 @@ export type Database = {
       orders: {
         Row: {
           created_at: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
           id: string
           shipping_address: string | null
           status: string | null
@@ -330,6 +360,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           shipping_address?: string | null
           status?: string | null
@@ -338,6 +371,9 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           shipping_address?: string | null
           status?: string | null
@@ -390,6 +426,33 @@ export type Database = {
           name?: string
           price?: number
           stock_quantity?: number | null
+        }
+        Relationships: []
+      }
+      refrigerators: {
+        Row: {
+          address: string
+          contact_person: string
+          created_at: string
+          id: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          contact_person: string
+          created_at?: string
+          id?: string
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          contact_person?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          updated_at?: string
         }
         Relationships: []
       }
