@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MessageCircle, X, Send, Bot, User, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -12,61 +14,82 @@ interface Message {
   timestamp: Date;
 }
 
-const Chatbot = () => {
+export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I\'m here to help you with any questions about our eco-friendly products and services. How can I assist you today?',
-      isBot: true,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [language, setLanguage] = useState('en');
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const quickReplies = [
-    'What products do you offer?',
-    'How does vermicompost work?',
-    'Tell me about biogas plants',
-    'How can I volunteer?',
-    'Donation information'
+  const quickReplies = {
+    en: [
+      "What eco-friendly products do you have?",
+      "Tell me about sustainability",
+      "How can I reduce waste?",
+      "What are the benefits of organic products?"
+    ],
+    hi: [
+      "आपके पास कौन से पर्यावरण-अनुकूल उत्पाद हैं?",
+      "स्थिरता के बारे में बताएं",
+      "मैं कैसे कचरा कम कर सकता हूं?",
+      "जैविक उत्पादों के क्या फायदे हैं?"
+    ],
+    es: [
+      "¿Qué productos ecológicos tienen?",
+      "Háblame sobre sostenibilidad",
+      "¿Cómo puedo reducir los residuos?",
+      "¿Cuáles son los beneficios de los productos orgánicos?"
+    ]
+  };
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'हिंदी' },
+    { code: 'es', name: 'Español' }
   ];
 
-  const botResponses: { [key: string]: string } = {
-    'what products do you offer': 'We offer 5 eco-friendly product lines: Happy Raithu (vermicompost), Gracious Gas (biogas units), SBL Pots (eco gardening pots), Clayer (clay water bottles), and Neem Brush (biodegradable toothbrushes). Each product is designed to support sustainable living!',
-    'how does vermicompost work': 'Vermicompost uses earthworms to break down organic waste into nutrient-rich fertilizer. It\'s completely natural, improves soil health, and reduces waste. Our Happy Raithu vermicompost is perfect for gardens and farms!',
-    'tell me about biogas plants': 'Our Gracious Gas biogas units convert kitchen waste and organic matter into clean cooking gas. They reduce waste, provide renewable energy, and are available for both domestic and commercial use. Perfect for sustainable homes!',
-    'how can i volunteer': 'We\'d love to have you join our volunteer community! You can help with environmental education, community outreach, event organization, and more. Visit our volunteer page to apply and make a difference!',
-    'donation information': 'Your donations help us expand our impact! We support vermicompost production, biogas plant setup, environmental education, and community development. All donations are tax-deductible under 80G.',
-    'hello': 'Hello there! Welcome to Kare 💖 Save - The Caring Cycle. I\'m here to help you learn about our sustainable products and services.',
-    'hi': 'Hi! Great to meet you. How can I help you today with our eco-friendly solutions?',
-    'price': 'Our prices vary by product. Vermicompost starts from ₹300, biogas units from ₹15,000, eco pots from ₹150, clay bottles from ₹800, and neem brushes from ₹150. Check our shop for detailed pricing!',
-    'delivery': 'We offer delivery across India! Orders above ₹500 get free delivery. Standard delivery takes 3-5 business days. We use eco-friendly packaging for all shipments.',
-    'contact': 'You can reach us at info@karesave.org or call +91 98765 43210. We\'re also available on WhatsApp for quick queries!',
-    'return': 'We have a 7-day return policy for unused products. For consumables like vermicompost, we offer replacement for quality issues. Your satisfaction is our priority!'
+  const welcomeMessages = {
+    en: "Hello! I'm here to help you with questions about our eco-friendly products and sustainable living. How can I assist you today?",
+    hi: "नमस्ते! मैं आपके पर्यावरण-अनुकूल उत्पादों और टिकाऊ जीवन के बारे में प्रश्नों में आपकी सहायता करने के लिए यहाँ हूँ। आज मैं आपकी कैसे सहायता कर सकता हूँ?",
+    es: "¡Hola! Estoy aquí para ayudarte con preguntas sobre nuestros productos ecológicos y vida sostenible. ¿Cómo puedo asistirte hoy?"
   };
 
-  const generateBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    // Check for exact matches first
-    if (botResponses[lowerMessage]) {
-      return botResponses[lowerMessage];
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        text: welcomeMessages[language as keyof typeof welcomeMessages],
+        isBot: true,
+        timestamp: new Date()
+      };
+      setMessages([welcomeMessage]);
     }
-    
-    // Check for partial matches
-    for (const [key, response] of Object.entries(botResponses)) {
-      if (lowerMessage.includes(key) || key.includes(lowerMessage)) {
-        return response;
-      }
+  }, [isOpen, language]);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-    
-    // Default response
-    return 'Thanks for your question! For specific inquiries, please contact us at info@karesave.org or call +91 98765 43210. Our team will be happy to help you with detailed information about our products and services.';
+  }, [messages]);
+
+  const sendMessageToAI = async (message: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-bot', {
+        body: { message, language }
+      });
+
+      if (error) throw error;
+      
+      return data.response || "I'm sorry, I couldn't process your message right now. Please try again.";
+    } catch (error) {
+      console.error('Error calling chatbot:', error);
+      return "I'm experiencing some technical difficulties. Please try again later or contact our support team.";
+    }
   };
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -76,24 +99,33 @@ const Chatbot = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
+    setInputMessage('');
+    setIsTyping(true);
 
-    // Simulate bot thinking delay
-    setTimeout(() => {
+    try {
+      const botResponseText = await sendMessageToAI(currentMessage);
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateBotResponse(inputMessage),
+        text: botResponseText,
         isBot: true,
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, botResponse]);
-    }, 1000);
-
-    setInputMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleQuickReply = (reply: string) => {
     setInputMessage(reply);
-    handleSendMessage();
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -121,7 +153,7 @@ const Chatbot = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Bot className="h-4 w-4 text-primary" />
-              Eco Assistant
+              EcoHarvest Assistant
             </CardTitle>
             <Button
               variant="ghost"
@@ -134,8 +166,43 @@ const Chatbot = () => {
           </CardHeader>
           
           <CardContent className="flex-1 flex flex-col p-0">
+            {/* Language Selection & Quick Replies */}
+            <div className="p-4 bg-gray-50 border-b">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  Language
+                </span>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {messages.length <= 1 && (
+                <div className="flex flex-wrap gap-2">
+                  {quickReplies[language as keyof typeof quickReplies].map((reply, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickReply(reply)}
+                      className="px-3 py-2 bg-white rounded-full text-sm border hover:bg-gray-100 transition-colors"
+                    >
+                      {reply}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
               <div className="space-y-3">
                 {messages.map((message) => (
                   <div
@@ -157,52 +224,42 @@ const Chatbot = () => {
                     </div>
                   </div>
                 ))}
+                {isTyping && (
+                  <div className="flex justify-start mb-4">
+                    <div className="max-w-xs bg-gray-100 rounded-lg p-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollArea>
 
-            {/* Quick Replies */}
-            {messages.length === 1 && (
-              <div className="p-2 border-t">
-                <div className="flex flex-wrap gap-1">
-                  {quickReplies.map((reply, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickReply(reply)}
-                      className="text-xs h-6"
-                    >
-                      {reply}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Input */}
             <div className="p-4 border-t">
-              <div className="flex gap-2">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }} className="flex gap-2">
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder={language === 'hi' ? 'अपना संदेश लिखें...' : language === 'es' ? 'Escribe tu mensaje...' : 'Type your message...'}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your message..."
-                  className="text-sm"
+                  className="flex-1"
+                  disabled={isTyping}
                 />
-                <Button 
-                  onClick={handleSendMessage}
-                  size="icon"
-                  className="h-8 w-8 flex-shrink-0"
-                >
-                  <Send className="h-3 w-3" />
+                <Button type="submit" size="sm" className="shrink-0" disabled={isTyping}>
+                  <Send className="h-4 w-4" />
                 </Button>
-              </div>
+              </form>
             </div>
           </CardContent>
         </Card>
       )}
     </>
   );
-};
-
-export default Chatbot;
+}
